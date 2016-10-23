@@ -68,12 +68,11 @@ predictions[predictions <=.5] = 0
 algLogit = LogisticRegression(random_state=1)
 #Calculates accuracy of each of the cross validation folds
 scores = cross_validation.cross_val_score(algLogit, trainingSet[features], trainingSet["Survived"], cv=3)
-print(scores.mean())
 
 #-------------------------------------------------------------------------------------
 #Preparing the testing set
 
-testSet = pandas.read_csv("testSet.csv")
+testSet = pd.read_csv("test.csv")
 
 testSet["Age"] = testSet["Age"].fillna(trainingSet["Age"].median())
 
@@ -88,5 +87,17 @@ testSet["Embarked"][testSet["Embarked"] == 'Q'] = 2
 
 testSet["Fare"] = testSet["Fare"].fillna(testSet["Fare"].median())
 
+#-------------------------------------------------------------------------------------
+#Training our Logit algorithm
+algLogit.fit(trainingSet[features], trainingSet["Survived"])
 
+# Make predictions using the test set.
+predictions2 = algLogit.predict(testSet[features])
 
+# Create a new dataframe with only the columns Kaggle wants from the dataset.
+submission = pd.DataFrame({
+        "PassengerId": testSet["PassengerId"],
+        "Survived": predictions2
+    })
+submission.to_csv("kaggle.csv", index=False)
+#-------------------------------------------------------------------------------------
