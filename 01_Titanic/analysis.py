@@ -7,10 +7,19 @@ print(trainingSet.head(5))
 
 #Imputing our dataframe
 trainingSet["Age"]=trainingSet["Age"].fillna(trainingSet["Age"].median())
-# print(trainingSet.describe())
+
 
 #Assigning a value to sex column
 trainingSet["Sex"][trainingSet["Sex"] == 'male'] = 0
 trainingSet.loc[trainingSet["Sex"] == 'female', "Sex"] = 1
 
-print(trainingSet["Sex"])
+#Assign values to Embarked column
+# na entries will be encodeded as S [most common embarking port]
+# S(0), C(1) and Q(2)
+trainingSet["Embarked"] = trainingSet["Embarked"].fillna('S')
+trainingSet.loc[trainingSet["Embarked"] == 'S', "Embarked"] = 0
+trainingSet["Embarked"][trainingSet["Embarked"] == 'C'] = 1
+trainingSet["Embarked"][trainingSet["Embarked"] == 'Q'] = 2
+
+print(trainingSet["Embarked"])
+
