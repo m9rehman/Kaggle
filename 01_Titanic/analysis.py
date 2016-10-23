@@ -7,4 +7,10 @@ print(trainingSet.head(5))
 
 #Imputing our dataframe
 trainingSet["Age"]=trainingSet["Age"].fillna(trainingSet["Age"].median())
-print(trainingSet.describe())
+# print(trainingSet.describe())
+
+#Assigning a value to sex column
+trainingSet["Sex"][trainingSet["Sex"] == 'male'] = 0
+trainingSet.loc[trainingSet["Sex"] == 'female', "Sex"] = 1
+
+print(trainingSet["Sex"])
