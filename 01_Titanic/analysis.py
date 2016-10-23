@@ -1,7 +1,10 @@
 import pandas as pd 
 import sklearn
 from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
 from sklearn.cross_validation import KFold
+import numpy as np
+from sklearn import cross_validation
 
 trainingSet = pd.read_csv('train.csv')
 
@@ -25,7 +28,7 @@ trainingSet["Embarked"][trainingSet["Embarked"] == 'C'] = 1
 trainingSet["Embarked"][trainingSet["Embarked"] == 'Q'] = 2
 
 
-
+#-------------------------------------------------------------------------------------
 #Using Linear Regression 
 algorithm = LinearRegression()
 
@@ -46,3 +49,44 @@ algorithm.fit(trainPredictors,trainingTarget)
 testPredictions = algorithm.predict(trainingSet[features].iloc[testIndices,:])
 predictions.append(testPredictions)
 print(predictions)
+
+
+#Doing some error analysis based on Kaggle's error metric (# of right predictions/ # of passengers)
+
+#Concatenating the 3 predictions np arrays
+predictions = np.concatenate(predictions,axis = 0)
+
+#Mapping our predictions to a binary result
+predictions[predictions > .5] = 1
+predictions[predictions <=.5] = 0
+
+# trainingSet["Matches"] = predictions == trainingSet["Survived"]
+# accuracy = (trainingSet["Matches"][trainingSet["Matches"]==True].value_counts()) / 891
+
+#-------------------------------------------------------------------------------------
+#Using Logistic Regression
+algLogit = LogisticRegression(random_state=1)
+#Calculates accuracy of each of the cross validation folds
+scores = cross_validation.cross_val_score(algLogit, trainingSet[features], trainingSet["Survived"], cv=3)
+print(scores.mean())
+
+#-------------------------------------------------------------------------------------
+#Preparing the testing set
+
+testSet = pandas.read_csv("testSet.csv")
+
+testSet["Age"] = testSet["Age"].fillna(trainingSet["Age"].median())
+
+testSet.loc[testSet["Sex"]== 'male',"Sex"] = 0
+testSet["Sex"][testSet["Sex"] == 'female'] = 1
+
+testSet["Embarked"] = testSet["Embarked"].fillna('S')
+
+testSet["Embarked"][testSet["Embarked"] == 'S'] = 0
+testSet["Embarked"][testSet["Embarked"] == 'C'] = 1
+testSet["Embarked"][testSet["Embarked"] == 'Q'] = 2
+
+testSet["Fare"] = testSet["Fare"].fillna(testSet["Fare"].median())
+
+
+
