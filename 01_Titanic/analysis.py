@@ -21,5 +21,14 @@ trainingSet.loc[trainingSet["Embarked"] == 'S', "Embarked"] = 0
 trainingSet["Embarked"][trainingSet["Embarked"] == 'C'] = 1
 trainingSet["Embarked"][trainingSet["Embarked"] == 'Q'] = 2
 
-print(trainingSet["Embarked"])
+# print(trainingSet["Embarked"])
 
+
+#Using Linear Regression based on Age to predict
+m = -2 
+b = 20
+trainingSet["LinPredictions"] = m*trainingSet["Age"] + b
+trainingSet["LinPredictions"][trainingSet["LinPredictions"] < 0] = int(0)
+trainingSet.loc[trainingSet["LinPredictions"] > 0] = int(1)
+
+print(trainingSet["LinPredictions"])
