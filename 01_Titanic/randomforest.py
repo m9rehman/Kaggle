@@ -32,7 +32,7 @@ features = ["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked"]
 # n_estimators is the number of trees we want to make
 # min_samples_split is the minimum number of rows we need to make a split
 # min_samples_leaf is the minimum number of samples we can have at the place where a tree branch ends (the bottom points of the tree)
-algRF = RandomForestClassifier(random_state=1, n_estimators=10, min_samples_split=2, min_samples_leaf=1)
+algRF = RandomForestClassifier(random_state=1, n_estimators=50, min_samples_split=4, min_samples_leaf=2)
 
 #Cross validation using 3 folds
 kf = KFold(trainingSet.shape[0],n_folds=3, random_state=1)
