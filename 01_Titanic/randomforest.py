@@ -6,6 +6,9 @@ from sklearn import cross_validation
 from sklearn.ensemble import RandomForestClassifier
 import re
 import operator
+import numpy as np
+from sklearn.feature_selection import SelectKBest, f_classif
+import matplotlib.pyplot as plt
 
 trainingSet = pd.read_csv('train.csv')
 
@@ -104,11 +107,36 @@ familyIDs = trainingSet.apply(getFamilyID,axis = 1)
 #Compress families < 3 members into one mapping
 familyIDs[trainingSet["FamilySize"] < 3] = -1 
 
-print(pd.value_counts(familyIDs))
+# print(pd.value_counts(familyIDs))
 trainingSet["FamilyID"] = familyIDs
 
+#--------------------------------------------------------------------------
+#Selecting only certain features
+
+features = ["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked", "FamilySize", "Title", "FamilyID"]
+
+# Perform feature selection
+selector = SelectKBest(f_classif, k=5)
+selector.fit(trainingSet[features], trainingSet["Survived"])
+
+# Get the raw p-values for each feature, and transform from p-values into scores
+scores = -np.log10(selector.pvalues_)
+
+# Plot the scores.  See how "Pclass", "Sex", "Title", and "Fare" are the best?
+plt.bar(range(len(features)), scores)
+plt.xticks(range(len(features)), features, rotation='vertical')
+plt.show()
+
+# Pick only the four best features.
+features = ["Pclass", "Sex", "Fare", "Title"]
 
 
+alg = RandomForestClassifier(random_state=1, n_estimators=50, min_samples_split=8, min_samples_leaf=4)
+
+kf = KFold(trainingSet.shape[0],n_folds=3,random_state=1)
+scores = cross_validation.cross_val_score(alg,trainingSet[features],trainingSet["Survived"],cv=kf)
+print(scores.mean())
+#--------------------------------------------------------------------------
 
 
 
