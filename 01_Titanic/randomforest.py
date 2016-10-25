@@ -63,4 +63,17 @@ def get_title(name):
 titles = trainingSet["Name"].apply(get_title)
 print(pd.value_counts(titles))
 
+#Title mapping, some are mapped to same v since they are so rare
+titleMap = {"Mr": 1, "Miss": 2, "Mrs": 3, "Master": 4, "Dr": 5, "Rev": 6, "Major": 7, "Col": 7, "Mlle": 8, "Mme": 8, "Don": 9, "Lady": 10, "Countess": 10, "Jonkheer": 10, "Sir": 9, "Capt": 7, "Ms": 2}
+
+for k,v in titleMap.items():
+	titles[titles == k] = v
+
+print(pd.value_counts(titles))
+
+#Adding to our dataframe
+trainingSet["Title"] = titles
+print(trainingSet.head())
+
+
 
