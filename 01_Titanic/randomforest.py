@@ -5,6 +5,7 @@ import numpy as np
 from sklearn import cross_validation
 from sklearn.ensemble import RandomForestClassifier
 import re
+import operator
 
 trainingSet = pd.read_csv('train.csv')
 
@@ -29,6 +30,7 @@ trainingSet["Embarked"][trainingSet["Embarked"] == 'Q'] = 2
 
 features = ["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked"]
 
+#--------------------------------------------------------------------------
 # Initialize our algorithm with the default paramters
 # n_estimators is the number of trees we want to make
 # min_samples_split is the minimum number of rows we need to make a split
@@ -40,7 +42,7 @@ kf = KFold(trainingSet.shape[0],n_folds=3, random_state=1)
 scores = cross_validation.cross_val_score(algRF, trainingSet[features], trainingSet["Survived"], cv=kf)
 # print(scores.mean())
 
-
+#--------------------------------------------------------------------------
 #Feature Engineering
 # Counting the family members using SibSp and Parch
 # How a rich a person was based on the length of their name using a lambda function with pandas .apply 
@@ -61,19 +63,52 @@ def get_title(name):
 
 #Applying our get_title function and printing title counts
 titles = trainingSet["Name"].apply(get_title)
-print(pd.value_counts(titles))
+# print(pd.value_counts(titles))
 
 #Title mapping, some are mapped to same v since they are so rare
-titleMap = {"Mr": 1, "Miss": 2, "Mrs": 3, "Master": 4, "Dr": 5, "Rev": 6, "Major": 7, "Col": 7, "Mlle": 8, "Mme": 8, "Don": 9, "Lady": 10, "Countess": 10, "Jonkheer": 10, "Sir": 9, "Capt": 7, "Ms": 2}
+titleMap = {"Mr": 1, "Miss": 2, "Mrs": 3, "Master": 4, "Dr": 5, "Rev": 6,
+ "Major": 7, "Col": 7, "Mlle": 8, "Mme": 8, "Don": 9, "Lady": 10, "Countess": 10, "Jonkheer": 10, "Sir": 9, "Capt": 7, "Ms": 2}
 
 for k,v in titleMap.items():
 	titles[titles == k] = v
 
-print(pd.value_counts(titles))
+# print(pd.value_counts(titles))
 
 #Adding to our dataframe
 trainingSet["Title"] = titles
-print(trainingSet.head())
+# print(trainingSet.head())
+
+#--------------------------------------------------------------------------
+#Family ID Mapping
+
+familyIDMap = {}
+
+def getFamilyID(row):
+	lastName = row["Name"].split(",")[0]
+	#How familyID is defined eg: Johnson5
+	familyID = "{0}{1}".format(lastName, row["FamilySize"])
+
+	#Checking our familyIDMap
+	if familyID not in familyIDMap:
+		if len(familyIDMap) == 0:
+			currID = 1
+		else:
+		#Otherwise find max of id and add 1
+			currID = (max(familyIDMap.items(), key=operator.itemgetter(1))[1] + 1)
+
+		familyIDMap[familyID] = currID
+	return familyIDMap[familyID]
+
+
+familyIDs = trainingSet.apply(getFamilyID,axis = 1)
+#Compress families < 3 members into one mapping
+familyIDs[trainingSet["FamilySize"] < 3] = -1 
+
+print(pd.value_counts(familyIDs))
+trainingSet["FamilyID"] = familyIDs
+
+
+
 
 
 
