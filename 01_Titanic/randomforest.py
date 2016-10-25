@@ -4,6 +4,7 @@ from sklearn.cross_validation import KFold
 import numpy as np
 from sklearn import cross_validation
 from sklearn.ensemble import RandomForestClassifier
+import re
 
 trainingSet = pd.read_csv('train.csv')
 
@@ -37,4 +38,29 @@ algRF = RandomForestClassifier(random_state=1, n_estimators=50, min_samples_spli
 #Cross validation using 3 folds
 kf = KFold(trainingSet.shape[0],n_folds=3, random_state=1)
 scores = cross_validation.cross_val_score(algRF, trainingSet[features], trainingSet["Survived"], cv=kf)
-print(scores.mean())
+# print(scores.mean())
+
+
+#Feature Engineering
+# Counting the family members using SibSp and Parch
+# How a rich a person was based on the length of their name using a lambda function with pandas .apply 
+# New Series are added to the dataframe
+
+trainingSet["FamilySize"] = trainingSet["SibSp"] + trainingSet["Parch"]
+trainingSet["NameLength"] = trainingSet["Name"].apply(lambda x: len(x))
+
+
+#Function to get titles using regex
+def get_title(name):
+
+	titleSearch = re.search(' ([A-Za-z]+)\.',name)
+
+	if titleSearch:
+		return titleSearch.group(1)
+	return ""
+
+#Applying our get_title function and printing title counts
+titles = trainingSet["Name"].apply(get_title)
+print(pd.value_counts(titles))
+
+
