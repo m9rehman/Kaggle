@@ -177,4 +177,27 @@ predictions = np.concatenate(predictions, axis=0)
 accuracy = sum(predictions[predictions == trainingSet["Survived"]]) / len(predictions)
 print(accuracy)
 
+#--------------------------------------------------------------------------
+#Applying our changes to the test set
+# 
+#Read the test set into titanic_test
+titles = titanic_test["Name"].apply(get_title)
+# We're adding the Dona title to the mapping, because it's in the test set, but not the training set
+title_mapping = {"Mr": 1, "Miss": 2, "Mrs": 3, "Master": 4, "Dr": 5, "Rev": 6, "Major": 7, "Col": 7, "Mlle": 8, "Mme": 8, "Don": 9, "Lady": 10, "Countess": 10, "Jonkheer": 10, "Sir": 9, "Capt": 7, "Ms": 2, "Dona": 10}
+for k,v in title_mapping.items():
+    titles[titles == k] = v
+titanic_test["Title"] = titles
+# Check the counts of each unique title.
+print(pd.value_counts(titanic_test["Title"]))
 
+# Now, we add the family size column.
+titanic_test["FamilySize"] = titanic_test["SibSp"] + titanic_test["Parch"]
+
+# Now we can add family ids.
+# We'll use the same ids that we did earlier.
+print(family_id_mapping)
+
+family_ids = titanic_test.apply(get_family_id, axis=1)
+family_ids[titanic_test["FamilySize"] < 3] = -1
+titanic_test["FamilyId"] = family_ids
+titanic_test["NameLength"] = titanic_test["Name"].apply(lambda x: len(x))
